@@ -39,6 +39,8 @@ function app() {
 		return promise
 		.then(res => res.json())
 		.then(async (res) => {
+			console.log(res);
+			console.log(res.next);
 			const lists = res.items.map(async (playlist) => {
 				return await handlePlaylist(playlist)
 			})
@@ -99,6 +101,7 @@ function app() {
 		a.href = URL.createObjectURL(file);
 		a.download = fileName;
 		a.click();
+		console.log('download!');
 	}
 
 	saveButton.onclick = async() => {
