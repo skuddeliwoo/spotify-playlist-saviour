@@ -22,34 +22,33 @@ function app() {
 		})
 	}
 
-	// todo: err handling 401 token expired
+	// TODO: err handling 401 token expired
 
-	// todo: object sorting: playlist name asc, tracks track_number asc
+	// TODO: object sorting: playlist name asc, tracks track_number asc
 
 	const saveButton = document.querySelector('#saveButton');
 
-	fetchPlaylists = async(url) => {
-		let promise = undefined
-		if (!url) {
-			promise = get(`https://api.spotify.com/v1/me/playlists`)
-		} else {
-			promise = get(url)
+	fetchPlaylists = async () => {
+		const playlists = []
+
+		let playlistBatchRes = await get(`https://api.spotify.com/v1/me/playlists`)
+		let playlistBatch = await playlistBatchRes.json()
+
+		playlistBatch.items.map((playlist) => {
+			playlists.push(handlePlaylist(playlist))
+		})
+
+		while (playlistBatch.next) {
+			playlistBatchRes = await get(playlistBatch.next)
+			playlistBatch = await playlistBatchRes.json()
+
+			playlistBatch.items.map((playlist) => {
+				playlists.push(handlePlaylist(playlist))
+			})
 		}
 
-		return promise
-		.then(res => res.json())
-		.then(async (res) => {
-			console.log(res);
-			console.log(res.next);
-			const lists = res.items.map(async (playlist) => {
-				return await handlePlaylist(playlist)
-			})
-			if (res.next) {
-				return await fetchPlaylists(res.next)
-			} else {
-				return lists
-			}
-		})
+		// returns array of promises created by handlePlaylists
+		return playlists
 	}
 
 	handlePlaylist = async (playlist) => {
@@ -105,7 +104,7 @@ function app() {
 	}
 
 	saveButton.onclick = async() => {
-		const playlists = await Promise.all(await fetchPlaylists()) 
+		const playlists = await Promise.all(fetchPlaylists()) 
 		download(JSON.stringify(playlists), 'playlists.json', 'text/json');
 	}
 }
