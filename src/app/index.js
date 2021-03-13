@@ -7,7 +7,7 @@ app.use(express.static('public'))
 const port = 3001;
 
 app.get('/', (req, res) => {
-	res.send('hello there! to use, please go to /login') // TODO: add anchor to /login
+	res.sendFile(__dirname + '/public/index.html')
 })
 
 app.get('/login', (req, res) => {
